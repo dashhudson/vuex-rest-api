@@ -190,7 +190,7 @@ class StoreCreator {
 
     const actions = this.resource.actions
     Object.keys(actions).forEach((action) => {
-      const { dispatchString, commitString, requestFn, autoCancel, onCancel } = actions[action]
+      const { dispatchString, commitString, requestFn, autoCancel } = actions[action]
 
       storeActions[dispatchString] = async ({ commit }, requestConfig = cloneDeep(StoreCreator.DEFAULT_REQUEST_CONFIG)) => {
         if (!requestConfig.params)
