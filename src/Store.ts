@@ -146,7 +146,7 @@ class StoreCreator {
           }
         }
 
-        if (typeof beforeRequest === 'function') {
+        if (beforeRequest) {
           beforeRequest(state, requestConfig)
         }
       }
@@ -158,7 +158,7 @@ class StoreCreator {
           state.source[property] = null
         }
 
-        if (typeof onSuccess === 'function') {
+        if (onSuccess) {
           onSuccess(state, payload, axios, requestConfig)
         } else if (property !== null) {
           state[property] = payload.data
@@ -174,9 +174,9 @@ class StoreCreator {
         }
 
         // Use the appropriate error callback if the error should handled / is a function
-        if (!isCancellationErr && typeof onError === 'function') {
+        if (!isCancellationErr && onError) {
           onError(state, payload, axios, requestConfig)
-        } else if (isCancellationErr && typeof onCancel === 'function') {
+        } else if (isCancellationErr && onCancel) {
           onCancel(state, payload, axios, requestConfig)
         }
       }
