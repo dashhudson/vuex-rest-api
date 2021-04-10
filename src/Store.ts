@@ -146,7 +146,7 @@ class StoreCreator {
           }
         }
 
-        if (beforeRequest) {
+        if (typeof beforeRequest === 'function') {
           beforeRequest(state, requestConfig)
         }
       }
@@ -158,41 +158,26 @@ class StoreCreator {
           state.source[property] = null
         }
 
-        if (onSuccess) {
+        if (typeof onSuccess === 'function') {
           onSuccess(state, payload, axios, requestConfig)
         } else if (property !== null) {
           state[property] = payload.data
         }
       }
-      mutations[`${commitString}_${this.errorSuffix}`] = (state, { payload, requestConfig }) => {
-
-        // Call onCancel if a cancellation error occurs, this can be helpful to let developers differentiate between
-        // a normal error path and something separate for cancellation. It will also be called if autoCancel is enabled
-        // where onError will not.
-        const isCancellationErr = axiosStatic.isCancel(payload)
-        if (typeof onCancel === 'function' && isCancellationErr) {
-          onCancel(state, payload, axios, requestConfig)
-        }
-
-        // The logic here is as follows: if either autoCancel is disabled or the error was not a cancellation error,
-        // we'll prevent error handling and clean up. We'll assume that for most cases where autoCancel is useful,
-        // we'll want to effectively suspend the lifetime of the pending state until a retry occurs.
-        const shouldHandleErr = !autoCancel || !isCancellationErr
-        if (!shouldHandleErr) {
-          return;
-        }
-
+      mutations[`${commitString}_${this.errorSuffix}`] = (state, { payload, requestConfig, isCancellationErr }) => {
+        // Clean up store if the err should be handled
         if (property !== null) {
           state.pending[property] = false
           state.error[property] = payload
           state.source[property] = null
+          state[property] = defaultState[property]
         }
 
-        if (onError) {
+        // Use the appropriate error callback if the error should handled / is a function
+        if (!isCancellationErr && typeof onError === 'function') {
           onError(state, payload, axios, requestConfig)
-        } else if (property !== null) {
-          // sets property to it's default value in case of an error
-          state[property] = defaultState[property]
+        } else if (isCancellationErr && typeof onCancel === 'function') {
+          onCancel(state, payload, axios, requestConfig)
         }
       }
     })
@@ -205,7 +190,7 @@ class StoreCreator {
 
     const actions = this.resource.actions
     Object.keys(actions).forEach((action) => {
-      const { dispatchString, commitString, requestFn } = actions[action]
+      const { dispatchString, commitString, requestFn, autoCancel, onCancel } = actions[action]
 
       storeActions[dispatchString] = async ({ commit }, requestConfig = cloneDeep(StoreCreator.DEFAULT_REQUEST_CONFIG)) => {
         if (!requestConfig.params)
@@ -221,10 +206,16 @@ class StoreCreator {
             })
             return Promise.resolve(response)
           }, (error) => {
-            commit(`${commitString}_${this.errorSuffix}`, {
-              payload: error, requestConfig
-            })
-            return Promise.reject(error)
+            // We'll ignore the err if autoCancel is enabled and the cause is cancellation.
+            const isCancellationErr = axiosStatic.isCancel(error)
+            const shouldHandleErr = !autoCancel || !isCancellationErr
+
+            if (shouldHandleErr) {
+              commit(`${commitString}_${this.errorSuffix}`, { payload: error, requestConfig, isCancellationErr })
+              return Promise.reject(error)
+            } else {
+              return Promise.resolve()
+            }
           })
       }
     })

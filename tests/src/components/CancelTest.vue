@@ -80,11 +80,7 @@ export default {
       return (pending) ? 'loading...' : JSON.stringify(items, null, 4)
     },
     async doGetItemsAutoCancel() {
-      try {
-        await this.getItemsLongRunningAutoCancel({ params: { foo: 'getAuto' } })
-      } catch (e) {
-        console.error(e)
-      }
+      this.getItemsLongRunningAutoCancel({ params: { foo: 'getAuto' } })
     },
     doCancelGetItemsManual() {
       if (this.cancel.source.itemsManual) {
