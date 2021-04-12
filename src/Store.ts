@@ -165,7 +165,6 @@ class StoreCreator {
         }
       }
       mutations[`${commitString}_${this.errorSuffix}`] = (state, { payload, requestConfig, isCancellationErr }) => {
-        // Clean up store if the err should be handled
         if (property !== null) {
           state.pending[property] = false
           state.error[property] = payload
@@ -173,7 +172,6 @@ class StoreCreator {
           state[property] = defaultState[property]
         }
 
-        // Use the appropriate error callback if the error should handled / is a function
         if (!isCancellationErr && onError) {
           onError(state, payload, axios, requestConfig)
         } else if (isCancellationErr && onCancel) {
