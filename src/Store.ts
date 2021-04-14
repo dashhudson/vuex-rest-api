@@ -169,13 +169,14 @@ class StoreCreator {
           state.pending[property] = false
           state.error[property] = payload
           state.source[property] = null
-          state[property] = defaultState[property]
         }
 
         if (!isCancellationErr && onError) {
           onError(state, payload, axios, requestConfig)
         } else if (isCancellationErr && onCancel) {
           onCancel(state, payload, axios, requestConfig)
+        } else if (property !== null) {
+          state[property] = defaultState[property]
         }
       }
     })
