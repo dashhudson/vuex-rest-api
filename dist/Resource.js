@@ -69,7 +69,7 @@ var Resource = /** @class */ (function () {
                 // this has the unintended side effect of setting content-type=application/json headers and is an unwanted
                 // side effect. This is the least intrusive way of handling this problem for now, but I don't think we really
                 // even need a default data prop in this flow.
-                if (method.toLowerCase() === 'get') {
+                if (["post", "put", "patch"].indexOf(method.toLowerCase()) === -1) {
                     delete fullRequestConfig.data;
                 }
                 return _this.axios.request(fullRequestConfig);
