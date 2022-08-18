@@ -119,7 +119,7 @@ var StoreCreator = /** @class */ (function () {
         var actions = this.resource.actions;
         Object.keys(actions).forEach(function (action) {
             var _a = actions[action], property = _a.property, commitString = _a.commitString, autoCancel = _a.autoCancel, beforeRequest = _a.beforeRequest, onSuccess = _a.onSuccess, onCancel = _a.onCancel, onError = _a.onError, axios = _a.axios;
-            mutations["" + commitString] = function (state, requestConfig) {
+            mutations["".concat(commitString)] = function (state, requestConfig) {
                 if (property !== null) {
                     state.pending[property] = true;
                     state.error[property] = null;
@@ -139,7 +139,7 @@ var StoreCreator = /** @class */ (function () {
                     beforeRequest(state, requestConfig);
                 }
             };
-            mutations[commitString + "_" + _this.successSuffix] = function (state, _a) {
+            mutations["".concat(commitString, "_").concat(_this.successSuffix)] = function (state, _a) {
                 var payload = _a.payload, requestConfig = _a.requestConfig;
                 if (property !== null) {
                     state.pending[property] = false;
@@ -153,7 +153,7 @@ var StoreCreator = /** @class */ (function () {
                     state[property] = payload.data;
                 }
             };
-            mutations[commitString + "_" + _this.errorSuffix] = function (state, _a) {
+            mutations["".concat(commitString, "_").concat(_this.errorSuffix)] = function (state, _a) {
                 var payload = _a.payload, requestConfig = _a.requestConfig, isCancellationErr = _a.isCancellationErr;
                 if (property !== null) {
                     state.pending[property] = false;
@@ -192,7 +192,7 @@ var StoreCreator = /** @class */ (function () {
                         commit(commitString, requestConfig);
                         return [2 /*return*/, requestFn(requestConfig)
                                 .then(function (response) {
-                                commit(commitString + "_" + _this.successSuffix, {
+                                commit("".concat(commitString, "_").concat(_this.successSuffix), {
                                     payload: response,
                                     requestConfig: requestConfig
                                 });
@@ -202,7 +202,7 @@ var StoreCreator = /** @class */ (function () {
                                 var isCancellationErr = axios_1.default.isCancel(error);
                                 var shouldHandleErr = !autoCancel || !isCancellationErr;
                                 if (shouldHandleErr) {
-                                    commit(commitString + "_" + _this.errorSuffix, { payload: error, requestConfig: requestConfig, isCancellationErr: isCancellationErr });
+                                    commit("".concat(commitString, "_").concat(_this.errorSuffix), { payload: error, requestConfig: requestConfig, isCancellationErr: isCancellationErr });
                                     return Promise.reject(error);
                                 }
                                 else {
